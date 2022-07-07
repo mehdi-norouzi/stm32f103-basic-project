@@ -12,9 +12,12 @@ BASE_LINKER   = ./linker
 BASE_MAKE     = ./make
 BASE_STARTUP  = ./startup
 
+BUILD_DIR ?= ./build
+
+
 # Standard values for project folders
-BIN_FOLDER ?= ./bin
-OBJ_FOLDER ?= ./obj
+BIN_FOLDER ?= $(BUILD_DIR)/bin
+OBJ_FOLDER ?= $(BUILD_DIR)/obj
 SRC_FOLDER ?= ./src
 INC_FOLDER ?= ./inc
 
@@ -83,7 +86,7 @@ CPPFLAGS += -mcpu=$(SERIES_CPU)
 CPPFLAGS += -march=$(SERIES_ARCH)
 CPPFLAGS += -mlittle-endian
 CPPFLAGS += -mthumb
-CPPFLAGS += -masm-syntax-unified
+#CPPFLAGS += -masm-syntax-unified
 
 # Output files
 ELF_FILE_NAME ?= stm32_executable.elf
@@ -132,11 +135,15 @@ $(ELF_FILE_PATH): $(SRC) $(OBJ_FILE_PATH) | $(BIN_FOLDER)
 $(OBJ_FILE_PATH): $(DEVICE_STARTUP) | $(OBJ_FOLDER)
 	$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $^ -o $@
 
-$(BIN_FOLDER):
+$(BUILD_DIR):
+	mkdir $(BUILD_DIR)
+
+$(BIN_FOLDER): $(BUILD_DIR)
 	mkdir $(BIN_FOLDER)
 
-$(OBJ_FOLDER):
+$(OBJ_FOLDER): $(BUILD_DIR)
 	mkdir $(OBJ_FOLDER)
+
 
 # Make clean
 clean:
@@ -145,7 +152,7 @@ clean:
 	rm -f $(OBJ_FILE_PATH)
 
 # Make flash
-flash:
+flash: $(BIN_FOLDER)/$(BIN_FILE_NAME)
 	st-flash write $(BIN_FOLDER)/$(BIN_FILE_NAME) $(FLASH)
 
 .PHONY: all clean flash
